@@ -4,20 +4,24 @@ import pygame
 import numpy as np
 
 
+
 class GridWorldEnv(gym.Env):
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 100}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 20}
+    
     # metadata = {"render_modes": "human", "render_fps": 100}
 
     def __init__(self, render_mode=None, size=5):
         self.size = size  # The size of the square grid
-        self.window_size = 512  # The size of the PyGame window
+        self.window_size = 500  # The size of the PyGame window
 
         # Observations are dictionaries with the agent's and the target's location.
         # Each location is encoded as an element of {0, ..., `size`}^2, i.e. MultiDiscrete([size, size]).
+        # [[4,5,6],[9,23,25],[1,15,17],[7,4,22],[12,7,13]]
         self.observation_space = spaces.Dict(
             {
-                "agent": spaces.Box(0, size - 1, shape=(2,), dtype=int),
+                "agent": spaces.Box(0, size - 1, shape=(2,), dtype=int), #we can add 
                 "target": spaces.Box(0, size - 1, shape=(2,), dtype=int),
+                # "basket": spaces.Box(np.array([]))
             }
         )
 
@@ -49,7 +53,7 @@ class GridWorldEnv(gym.Env):
         self.clock = None
 
     def _get_obs(self):
-        return {"agent": self._agent_location, "target": self._target_location}
+        return {"agent": self._agent_location, "target": self._target_location,}
 
     def _get_info(self):
         return {
@@ -69,12 +73,12 @@ class GridWorldEnv(gym.Env):
         #     0, self.size, size=2, dtype=int)
         # We will sample the target's location randomly until it does not coincide with the agent's location
 
-        self._target_location = np.array([3, 3], dtype=int)
-        # self._target_location = self._agent_location
-        # while np.array_equal(self._target_location, self._agent_location):
-        #     self._target_location = self.np_random.integers(
-        #         0, self.size, size=2, dtype=int
-        #     )
+        # self._target_location = np.array([3, 3], dtype=int)
+        self._target_location = self._agent_location
+        while np.array_equal(self._target_location, self._agent_location):
+            self._target_location = self.np_random.integers(
+                0, self.size, size=2, dtype=int
+            )
 
         observation = self._get_obs()
         info = self._get_info()
@@ -104,24 +108,33 @@ class GridWorldEnv(gym.Env):
 
         return observation, reward, terminated, False, info
 
+    
     def render(self):
         if self.render_mode == "rgb_array":
             return self._render_frame()
-
+    BASKET = pygame.image.load('group11/resources/basket.png')
+    BASKET = pygame.transform.scale(BASKET,(100,100))
     def _render_frame(self):
+        
         if self.window is None and self.render_mode == "human":
             pygame.init()
             pygame.display.init()
             self.window = pygame.display.set_mode(
-                (self.window_size, self.window_size))
+                (self.window_size, self.window_size+100))
         if self.clock is None and self.render_mode == "human":
             self.clock = pygame.time.Clock()
 
-        canvas = pygame.Surface((self.window_size, self.window_size))
+        canvas = pygame.Surface((self.window_size, self.window_size+100))
         canvas.fill((255, 255, 255))
         pix_square_size = (
             self.window_size / self.size
         )  # The size of a single grid square in pixels
+        for i in range(5):
+            canvas.blit(self.BASKET, (pix_square_size * np.array([i,5])))
+        # pygame.draw.rect(
+        #     canvas,
+        #     (0,255,0),
+        #     pygame.Rect(pix_square_size * np.array([0,5]),(pix_square_size+400, pix_square_size)))
 
         # First we draw the target
         pygame.draw.rect(
