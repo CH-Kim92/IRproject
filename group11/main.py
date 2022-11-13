@@ -60,9 +60,9 @@ def simulate():
 
 if __name__ == "__main__":
     env = gym.make("warehouse_grid/GridWorld-v0")
-    MAX_EPISODES = 1000
-    MAX_TRY = 50
-    epsilon = 1
+    MAX_EPISODES = 4000
+    MAX_TRY = 100
+    epsilon = 0.9
     epsilon_decay = 0.999
     learning_rate = 0.1
     gamma = 0.6
