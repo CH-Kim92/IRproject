@@ -4,10 +4,9 @@ import pygame
 import numpy as np
 
 
-
 class GridWorldEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 20}
-    
+
     # metadata = {"render_modes": "human", "render_fps": 100}
 
     def __init__(self, render_mode=None, size=5):
@@ -19,7 +18,8 @@ class GridWorldEnv(gym.Env):
         # [[4,5,6],[9,23,25],[1,15,17],[7,4,22],[12,7,13]]
         self.observation_space = spaces.Dict(
             {
-                "agent": spaces.Box(0, size - 1, shape=(2,), dtype=int), #we can add 
+                # we can add
+                "agent": spaces.Box(0, size - 1, shape=(2,), dtype=int),
                 "target": spaces.Box(0, size - 1, shape=(2,), dtype=int),
                 # "basket": spaces.Box(np.array([]))
             }
@@ -53,7 +53,7 @@ class GridWorldEnv(gym.Env):
         self.clock = None
 
     def _get_obs(self):
-        return {"agent": self._agent_location, "target": self._target_location,}
+        return {"agent": self._agent_location, "target": self._target_location, }
 
     def _get_info(self):
         return {
@@ -108,14 +108,14 @@ class GridWorldEnv(gym.Env):
 
         return observation, reward, terminated, False, info
 
-    
     def render(self):
         if self.render_mode == "rgb_array":
             return self._render_frame()
-    BASKET = pygame.image.load('group11/resources/basket.png')
-    BASKET = pygame.transform.scale(BASKET,(100,100))
+    BASKET = pygame.image.load('resources/basket.png')
+    BASKET = pygame.transform.scale(BASKET, (100, 100))
+
     def _render_frame(self):
-        
+
         if self.window is None and self.render_mode == "human":
             pygame.init()
             pygame.display.init()
@@ -130,7 +130,7 @@ class GridWorldEnv(gym.Env):
             self.window_size / self.size
         )  # The size of a single grid square in pixels
         for i in range(5):
-            canvas.blit(self.BASKET, (pix_square_size * np.array([i,5])))
+            canvas.blit(self.BASKET, (pix_square_size * np.array([i, 5])))
         # pygame.draw.rect(
         #     canvas,
         #     (0,255,0),
