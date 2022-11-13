@@ -111,7 +111,7 @@ class GridWorldEnv(gym.Env):
     def render(self):
         if self.render_mode == "rgb_array":
             return self._render_frame()
-    BASKET = pygame.image.load('resources/basket.png')
+    BASKET = pygame.image.load('../resources/basket.png')
     BASKET = pygame.transform.scale(BASKET, (100, 100))
 
     def _render_frame(self):
