@@ -82,6 +82,7 @@ class map2D:
         if flag == 1:
             self.robot1._set_position(ag1)
             self.robot2._set_position(ag2)
+        print(self.robot1.pos, self.robot2.pos)
 
     def action(self, action):
 
@@ -89,46 +90,50 @@ class map2D:
         action2 = action[1]
 
         if action1 == 0:  # right
-            direction = np.array([1, 0], dtype=int)
+            direction1 = np.array([1, 0], dtype=int)
         elif action1 == 1:  # down
-            direction = np.array([0, 1], dtype=int)
+            direction1 = np.array([0, 1], dtype=int)
         elif action1 == 2:  # left
-            direction = np.array([-1, 0], dtype=int)
+            direction1 = np.array([-1, 0], dtype=int)
         elif action1 == 3:  # up
-            direction = np.array([0, -1], dtype=int)
-        ## pick up ##
-        elif action1 == 4:
-            self.robot1._set_holding_item(self.robot1.pos)
-        ## drop ##
-        elif action1 == 5:
-            self.robot1.holding = []
-            self.items.remove(self.robot1.holding)
-        elif action1 == 6:
-            None
-        if action1 < 4:
-            self.robot1.pos = np.clip(
-                self.robot1.pos + direction, 0, Size - 1)
+            direction1 = np.array([0, -1], dtype=int)
+        # ## pick up ##
+        # elif action1 == 4:
+        #     self.robot1._set_holding_item(self.robot1.pos)
+        # ## drop ##
+        # elif action1 == 5:
+        #     self.robot1.holding = []
+        #     self.items.remove(self.robot1.holding)
+
+        # elif action1 == 6:
+        #     None
+        # if action1 < 4:
+        #     self.robot1.pos = np.clip(
+        #         self.robot1.pos + direction, 0, 4)
 
         if action2 == 0:  # right
-            direction = np.array([1, 0], dtype=int)
+            direction2 = np.array([1, 0], dtype=int)
         elif action2 == 1:  # down
-            direction = np.array([0, 1], dtype=int)
+            direction2 = np.array([0, 1], dtype=int)
         elif action2 == 2:  # left
-            direction = np.array([-1, 0], dtype=int)
+            direction2 = np.array([-1, 0], dtype=int)
         elif action2 == 3:  # up
-            direction = np.array([0, -1], dtype=int)
+            direction2 = np.array([0, -1], dtype=int)
         ## pick up ##
         elif action2 == 4:
             self.robot2._set_holding_item(self.robot2.pos)
         ## drop ##
-        elif action2 == 5:
-            self.robot2.holding = []
-            self.items.remove(self.robot2.holding)
-        elif action2 == 6:
-            None
-        if action2 < 4:
-            self.robot2.pos = np.clip(
-                self.robot2.pos + direction, 0, Size - 1)
+        # elif action2 == 5:
+        #     self.robot2.holding = []
+        #     self.items.remove(self.robot2.holding)
+        # elif action2 == 6:
+        #     None
+
+        self.robot1.pos = self.robot1.pos + direction1
+        self.robot2.pos = self.robot2.pos + direction2
+        # if action2 < 4:
+        #     self.robot2.pos = np.clip(
+        #         self.robot2.pos + direction, 0, 4)
 
     def terminate(self):
         isdone = False
@@ -192,37 +197,8 @@ class map2D:
         self.canvas = pygame.Surface((Window_size, Window_size+100))
         self.canvas.fill((255, 255, 255))
 
-        ### Drawing storages ###
-        # for i in self.storage:
-        #     for c in self.items:
-        #         if np.array_equal(i[0], c):
-        #             pygame.draw.rect(
-        #                 self.canvas,
-        #                 i[1],
-        #                 pygame.Rect(
-        #                     pix_square_size * i[0],
-        #                     (pix_square_size-3, pix_square_size-3)
-        #                 )
-        #             )
-
-        ### Drawing grd ###
-
         ### Drawing robot ###
         # print(self.robot.colour)
-        pygame.draw.circle(
-            self.canvas,
-            RED,
-            (np.array(self.robot1.pos, dtype=int) + 0.5) * pix_square_size,
-            pix_square_size / 5,
-        )
-        pygame.draw.circle(
-            self.canvas,
-            BLUE,
-            (np.array(self.robot2.pos, dtype=int) + 0.5) * pix_square_size,
-            pix_square_size / 3,
-            width=3
-        )
-
         ## Drawing target ###
         pygame.draw.rect(
             self.canvas,
@@ -236,21 +212,19 @@ class map2D:
             pygame.Rect(pix_square_size*self.targets[1],
                         (pix_square_size, pix_square_size))
         )
-
-        # for b in self.baskets:
-        #     for i in range(len(b.item)):
-        #         for k in range(len(self.poss)):
-        #             if np.array_equal(self.poss[k], b.item[i]):
-        #                 pygame.draw.rect(
-        #                     self.canvas,
-        #                     self.storage[k][1],
-        #                     pygame.Rect(
-        #                         pix_square_size * b.pos+i *
-        #                         pix_square_size/len(b.item),
-        #                         (pix_square_size/len(b.item), pix_square_size)
-        #                     )
-        #                 )
-
+        pygame.draw.circle(
+            self.canvas,
+            RED,
+            (np.array(self.robot1.pos, dtype=int) + 0.5) * pix_square_size,
+            pix_square_size / 5,
+        )
+        pygame.draw.circle(
+            self.canvas,
+            BLUE,
+            (np.array(self.robot2.pos, dtype=int) + 0.5) * pix_square_size,
+            pix_square_size / 3,
+            width=3
+        )
         ### Draw Line ####
         for x in range(Size + 2):
             pygame.draw.line(

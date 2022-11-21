@@ -6,7 +6,7 @@ from warehouse_grid.envs.map import map2D
 
 
 class GridWorldEnv(gym.Env):
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 300}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
 
     def __init__(self):
         self.pygame = map2D(flag=0, ag1=None, ag2=None)
@@ -20,10 +20,10 @@ class GridWorldEnv(gym.Env):
         self.action_sequence = None
         self.agents_location = None
 
-    def reset(self, ag1, ag2, t1, t2):
+    def reset(self, ag1, ag2, t1, t2, seed=None, options=None):
         del self.pygame
         self.pygame = map2D(flag=1, ag1=ag1, ag2=ag2)
-        # self.set_agents_location([ag1, ag2])
+        print(ag1, ag2)
         self.set_targets(t1, t2)
         obs = self.pygame.start()
         return obs
