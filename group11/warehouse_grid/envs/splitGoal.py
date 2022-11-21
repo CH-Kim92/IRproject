@@ -76,13 +76,13 @@ def split_goal(agent_position, baskets):
         # print("agent 2 current location :", current_agent2_position)
 
     if len(goal_list) == 1:
-        agent1_pose = agent1_goals[len(agent1_goals)-1][0]
-        agent2_pose = agent2_goals[len(agent2_goals)-1][0]
+        # agent1_pose = agent1_goals[len(agent1_goals)-1][0]
+        # agent2_pose = agent2_goals[len(agent2_goals)-1][0]
         a1 = cost_table[0][0]
         a2 = cost_table[1][0]
         if a1 > a2:
             agent2_goals.append(goal_list[0])
         else:
             agent1_goals.append(goal_list[0])
-    print(agent1_goals, agent2_goals)
+    # print(agent1_goals, agent2_goals)
     return agent1_goals, agent2_goals

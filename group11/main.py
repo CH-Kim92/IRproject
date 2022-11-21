@@ -6,69 +6,93 @@ import gym
 import warehouse_grid
 
 
-def simulate():
+def simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, target1, target2):
     global epsilon, epsilon_decay
+    ag1_action1 = agent1_actions[:-1]
+    ag2_action2 = agent2_actions[:-1]
+    ac1_len = len(ag1_action1)
+    ac2_len = len(ag2_action2)
+
+    iteration = 0
+
+    if ac1_len < ac2_len:
+        iteration = ac1_len
+    else:
+        iteration = ac2_len
+
     for episode in range(MAX_EPISODES):
+        if ac1_len < ac2_len:
+            iteration = ac1_len
+        else:
+            iteration = ac2_len
 
         # Init environment
-        state = env.reset()
+        state = env.reset(ag1=agent1_position,
+                          ag2=agent2_position, t1=target1, t2=target2)
         total_reward = 0
         best_action_sequence = []
 
-        i = 0
+        ac1 = ag1_action1
+        ac2 = ag2_action2
+
+        random.shuffle(ac1)
+        random.shuffle(ac2)
+
         # AI tries up to MAX_TRY times
-        for t in range(MAX_TRY):
+        for i in range(iteration):
 
             # In the beginning, do random action to learn
-            agent1 = state[0]
-            agent2 = state[1]
-            num_action = 0
-            if ac1 > ac2:
-                num_action = ac2
-            else:
-                num_action = ac1
+            agent1 = state['agent1']
+            agent2 = state['agent2']
 
             new_state = None
             reward = 0
             done = False
 
-            action1 = 10
-            action2 = 10
             ## agent1 moving ##
+            action1 = ac1[i]
+            action2 = ac2[i]
 
+            action = [action1, action2]
             # for i in range(num_action):
-
-            action = env.action_space.sample()
-            print(x_agent, y_agent)
-            if random.uniform(0, 1) < epsilon and y_agent == 5:
-                ls = [0, 1, 2, 3, 5]
-                action = random.choice(ls)
-            elif random.uniform(0, 1) < epsilon and y_agent < 5:
-                ls = [0, 1, 2, 3, 4]
-                action = random.choice(ls)
-            else:
-                if y_agent == 5:
-                    ls = q_table[x_agent, y_agent]
-                    ls[4] = min(ls)
-                    action = np.argmax(ls)
-                elif y_agent < 5:
-                    ls = q_table[x_agent, y_agent]
-                    ls[5] = min(ls)
-                    action = np.argmax(ls)
+            # if random.uniform(0, 1) < epsilon and y_agent == 5:
+            #     ls = [0, 1, 2, 3, 5]
+            #     action = random.choice(ls)
+            # elif random.uniform(0, 1) < epsilon and y_agent < 5:
+            #     ls = [0, 1, 2, 3, 4]
+            #     action = random.choice(ls)
+            # else:
+            #     if y_agent == 5:
+            #         ls = q_table[x_agent, y_agent]
+            #         ls[4] = min(ls)
+            #         action = np.argmax(ls)
+            #     elif y_agent < 5:
+            #         ls = q_table[x_agent, y_agent]
+            #         ls[5] = min(ls)
+            #         action = np.argmax(ls)
 
             # Do action and get result
             next_state, reward, done, _, = env.step(action)
             total_reward += reward
 
             # Get correspond q value from state, action pair
-            next_agent_x = next_state[0]
-            next_agent_y = next_state[1]
-            q_value = q_table[x_agent, y_agent][action]
-            best_q = np.max(q_table[next_agent_x, next_agent_y])
+            next_agent1 = next_state['agent1']
+            next_agent2 = next_state['agent2']
+            agent1_q_value = agent1_q_table[agent1[0], agent1[1]][action]
+            agent2_q_value = agent2_q_table[agent2[0], agent2[1]][action]
+            # q_value = q_table[x_agent, y_agent][action]
+            best_q1 = np.max(agent1_q_table[next_agent1[0], next_agent1[1]])
+            best_q2 = np.max(agent2_q_table[next_agent2[0], next_agent2[1]])
+            # best_q = np.max(q_table[next_agent_x, next_agent_y])
 
             # Q(state, action) <- (1 - a)Q(state, action) + a(reward + rmaxQ(next state, all actions))
-            q_table[x_agent, y_agent][action] = (
-                1 - learning_rate) * q_value + learning_rate * (reward + gamma * best_q)
+            agent1_q_table[agent1[0], agent1[1]][action] = (
+                1 - learning_rate) * agent1_q_value + learning_rate * (reward + gamma * best_q1)
+            agent2_q_table[agent2[0], agent2[1]][action] = (
+                1 - learning_rate) * agent2_q_value + learning_rate * (reward + gamma * best_q2)
+
+            # q_table[x_agent, y_agent][action] = (
+            #     1 - learning_rate) * q_value + learning_rate * (reward + gamma * best_q)
 
             # Set up for the next iteration
             state = next_state
@@ -77,9 +101,9 @@ def simulate():
             env.render()
 
             # When episode is done, print reward
-            if done or t >= MAX_TRY - 1:
+            if done or i >= MAX_TRY - 1:
                 print("Episode %d finished after %i time steps with total reward = %f." % (
-                    episode, t, total_reward))
+                    episode, i, total_reward))
                 break
 
         # exploring rate decay
@@ -162,6 +186,9 @@ def valid_concatenate(agent1_pos, agent2_pos, action1, action2):
     bl = len(action2)
     val_seq = []
     small_actions = None
+
+    a1_seq = []
+    a2_seq = []
     if al < bl:
         small_actions = al
     else:
@@ -175,12 +202,24 @@ def valid_concatenate(agent1_pos, agent2_pos, action1, action2):
             # print(sub_action2)
             a1_pos, a2_pos, valid = validation(
                 pos1, pos2, sub_action1, sub_action2)
+            a1_seq.append(a1_pos)
+            a2_seq.append(a2_pos)
             val_seq.append(valid)
             pos1 = a1_pos[len(a1_pos)-1]
             pos2 = a2_pos[len(a2_pos)-1]
             # print(valid)
-
-    return val_seq
+    l1 = len(a1_seq)
+    l2 = len(a2_seq)
+    # a1_seq = np.array(a1_seq)
+    # a2_seq = np.array(a2_seq)
+    # a1_seq = a1_seq.flatten()
+    print(a1_seq)
+    smlen = 0
+    if l1 < l2:
+        smlen = l1
+    else:
+        smeln = l2
+    return a1_seq, a2_seq, val_seq
 
 
 if __name__ == "__main__":
@@ -192,14 +231,56 @@ if __name__ == "__main__":
     learning_rate = 0.1
     gamma = 0.6
     agent1_action_sequence, agnet2_action_sequence = env.get_action_sequence()
-    print(agent1_action_sequence)
-    print(agnet2_action_sequence)
+    # print(agent1_action_sequence)
+    # print(agnet2_action_sequence)
     agent1_pos, agent2_pos = env.get_agents_location()
     # print(validation(agent1_pos, agent2_pos,
     #       agent1_action_sequence[0][1], agnet2_action_sequence[0][1]))
-    print(valid_concatenate(agent1_pos, agent2_pos,
-          agent1_action_sequence, agnet2_action_sequence))
-    agent1_q_table = np.zeros((5, 5, 7))
-    agent2_q_table = np.zeros((5, 5, 7))
-    q_table = np.zeros((5, 5, 6))
+    a1_seq, a2_seq, valid_seq = valid_concatenate(agent1_pos, agent2_pos,
+                                                  agent1_action_sequence, agnet2_action_sequence)
+    # print(a1_seq)  # position
+    # print(a2_seq)  # position
+    # print(valid_seq)
+    agent1_q_table = np.zeros((6, 6, 4))
+    agent2_q_table = np.zeros((6, 6, 4))
+    q_table = np.zeros((6, 6, 4))
+
+    temp_a1_pos = 0
+    temp_a2_pos = 0
+    collision_action1_seq = []
+    collision_action2_seq = []
+    target1 = None
+    target2 = None
+    id = 0
+    if valid_seq.count(False) != 0:
+        collistion_index = valid_seq.index(False)
+        # print(collistion_index)
+        # print(len(agent1_action_sequence))
+        if collistion_index == 0:
+            temp_a1_pos = agent1_pos
+            temp_a2_pos = agent2_pos
+        else:
+            temp_a1_pos = a1_seq[collistion_index-1][-1]
+            temp_a2_pos = a2_seq[collistion_index-1][-1]
+        if collistion_index % 2 == 0:
+            id = 0
+        else:
+            id = 1
+        collision_action1_seq = agent1_action_sequence[int(
+            collistion_index/2)][id]
+        collision_action2_seq = agnet2_action_sequence[int(
+            collistion_index/2)][id]
+        target1 = a1_seq[collistion_index][-1]
+        target2 = a2_seq[collistion_index][-1]
+        print(temp_a1_pos)
+        print(temp_a2_pos)
+        print(collision_action1_seq)
+        print(collision_action2_seq)
+        print(target1)
+        print(target2)
+        simulate(temp_a1_pos, temp_a2_pos,
+                 collision_action1_seq, collision_action2_seq, target1, target2)
+
+    # collision_index = valid_seq.index(False)
+    # temp_agent1_location =
     # simulate()

@@ -4,16 +4,13 @@ import numpy as np
 
 
 class agent:
-    def __init__(self, pos=None, goal=None, holding_item=[]):
+    def __init__(self, pos=None, goal=None):
         self.goal = goal
         self.pos = pos
-        self.holding = holding_item
         self.initpose = pos
 
     def _get_obs(self):
-        position = self.pos
-        obs = np.append(position, self.holding)
-        return obs
+        return self.pos
 
     def _get_goals(self):
         return self.goal
