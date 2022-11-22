@@ -6,14 +6,12 @@ import gym
 import warehouse_grid
 
 
-def simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, target1, target2):
+def shuffle_simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, target1, target2):
     global epsilon, epsilon_decay
     ag1_action1 = agent1_actions[:-1]
     ag2_action2 = agent2_actions[:-1]
     ac1_len = len(ag1_action1)
     ac2_len = len(ag2_action2)
-    print(ag1_action1)
-    print(ag2_action2)
     iteration = 0
 
     if ac1_len < ac2_len:
@@ -34,7 +32,70 @@ def simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, t
 
         random.shuffle(ac1)
         random.shuffle(ac2)
-        print(state)
+        # print(state)
+
+        for i in range(iteration):
+
+            reward = 0
+            done = False
+
+            ## agent1 moving ##
+            action1 = ac1[i]
+            action2 = ac2[i]
+
+            action = [action1, action2]
+            # Do action and get result
+            _, reward, done, _, = env.step(action)
+            total_reward += reward
+
+            # Draw games
+            env.render()
+
+            if i == iteration-1:
+                ac1.append(agent1_actions[-1])
+                ac2.append(agent2_actions[-1])
+                return ac1, ac2
+
+            # When episode is done, print reward
+            if done or i >= MAX_TRY - 1:
+                break
+
+        # exploring rate decay
+        if epsilon >= 0.005:
+            epsilon *= epsilon_decay
+
+    return
+
+
+def simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, target1, target2):
+    global epsilon, epsilon_decay
+    ag1_action1 = agent1_actions[:-1]
+    ag2_action2 = agent2_actions[:-1]
+    ac1_len = len(ag1_action1)
+    ac2_len = len(ag2_action2)
+    # print(ag1_action1)
+    # print(ag2_action2)
+    iteration = 0
+
+    if ac1_len < ac2_len:
+        iteration = ac1_len
+    else:
+        iteration = ac2_len
+
+    for episode in range(MAX_EPISODES):
+
+        # Init environment
+        state = env.reset(ag1=agent1_position,
+                          ag2=agent2_position, t1=target1, t2=target2)
+        total_reward = 0
+        best_action_sequence = []
+
+        ac1 = ag1_action1
+        ac2 = ag2_action2
+
+        random.shuffle(ac1)
+        random.shuffle(ac2)
+        # print(state)
         # AI tries up to MAX_TRY times
         for i in range(iteration):
 
@@ -221,10 +282,13 @@ def valid_concatenate(agent1_pos, agent2_pos, action1, action2):
             new_a2_seq.append(s)
     l1 = len(new_a1_seq)
     l2 = len(new_a2_seq)
+    less_action_agent = 0
     smlen = 0
     if l1 < l2:
+        less_action_agent = 1
         smlen = l1
     else:
+        less_action_agent = 2
         smlen = l2
 
     for i in range(int(smlen/2)):
@@ -234,8 +298,8 @@ def valid_concatenate(agent1_pos, agent2_pos, action1, action2):
         else:
             valid = True
             val_seq.append(valid)
-    print(val_seq.index(False))
-    return a1_seq, a2_seq, val_seq
+
+    return a1_seq, a2_seq, val_seq, less_action_agent
 
 
 if __name__ == "__main__":
@@ -248,8 +312,21 @@ if __name__ == "__main__":
     gamma = 0.6
     agent1_action_sequence, agnet2_action_sequence = env.get_action_sequence()
     agent1_pos, agent2_pos = env.get_agents_location()
-    a1_seq, a2_seq, valid_seq = valid_concatenate(agent1_pos, agent2_pos,
-                                                  agent1_action_sequence, agnet2_action_sequence)
+    a1_seq, a2_seq, valid_seq, less_action_agent = valid_concatenate(agent1_pos, agent2_pos,
+                                                                     agent1_action_sequence, agnet2_action_sequence)
+    if np.array_equal(a1_seq[-1][-1], a2_seq[-1][-1]):
+        if less_action_agent == 1:
+            new_ac = a1_seq[-1][-1]
+            if new_ac[0] == 4:
+                agent1_action_sequence[-1][-1].append(2)
+            else:
+                agent1_action_sequence[-1][-1].append(0)
+        else:
+            new_ac = a2_seq[-1][-1]
+            if new_ac[0] == 4:
+                agent1_action_sequence[-1][-1].append(2)
+            else:
+                agent1_action_sequence[-1][-1].append(0)
 
     agent1_q_table = np.zeros((6, 6, 4))
     agent2_q_table = np.zeros((6, 6, 4))
@@ -261,7 +338,6 @@ if __name__ == "__main__":
     collision_action2_seq = []
     target1 = None
     target2 = None
-    id = 0
 
     if valid_seq.count(False) != 0:
         collistion_index = valid_seq.index(False)
@@ -279,17 +355,16 @@ if __name__ == "__main__":
         temp_a2_pos = a2_seq[action2_index - 1][-1]
         target1 = a1_seq[action1_index][-1]
         target2 = a2_seq[action2_index][-1]
-        # print(ix1[0], ix1[1])
-        # print(a1_seq[ix1[0]*2 - 1])
-        print(temp_a1_pos)
-        print(temp_a2_pos)
-        print(unvalid_action1)
-        print(unvalid_action2)
-        print(target1)
-        print(target2)
-        simulate(temp_a1_pos, temp_a2_pos, unvalid_action1,
-                 unvalid_action2, target1, target2)
-        # print(a1_seq[ix1[0]][ix1[1]])
+        v_action1, v_action2 = shuffle_simulate(temp_a1_pos, temp_a2_pos, unvalid_action1,
+                                                unvalid_action2, target1, target2)
+
+        agent1_action_sequence[ix1[0]][ix1[1]] = v_action1
+        agnet2_action_sequence[ix2[0]][ix2[1]] = v_action2
+
+    a1_seq, a2_seq, valid_seq, less_action_agent = valid_concatenate([0, 0], [3, 0],
+                                                                     agent1_action_sequence, agnet2_action_sequence)
+
+    # print(a1_seq[ix1[0]][ix1[1]])
 
     # if valid_seq.count(False) != 0:
     #     collistion_index = valid_seq.index(False)
@@ -311,14 +386,14 @@ if __name__ == "__main__":
     #         collistion_index/2)][id]
     #     target1 = a1_seq[collistion_index][-1]
     #     target2 = a2_seq[collistion_index][-1]
-        # print(temp_a1_pos)
-        # print(temp_a2_pos)
-        # print(collision_action1_seq)
-        # print(collision_action2_seq)
-        # print(target1)
-        # print(target2)
-        # simulate(temp_a1_pos, temp_a2_pos,
-        #          collision_action1_seq, collision_action2_seq, target1, target2)
+    # print(temp_a1_pos)
+    # print(temp_a2_pos)
+    # print(collision_action1_seq)
+    # print(collision_action2_seq)
+    # print(target1)
+    # print(target2)
+    # simulate(temp_a1_pos, temp_a2_pos,
+    #          collision_action1_seq, collision_action2_seq, target1, target2)
 
     # collision_index = valid_seq.index(False)
     # temp_agent1_location =

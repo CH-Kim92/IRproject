@@ -23,7 +23,7 @@ GRAY = (128, 128, 128)
 
 
 class map2D:
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 100}
 
     def __init__(self, flag, ag1, ag2):
         self.render_mode = "human"

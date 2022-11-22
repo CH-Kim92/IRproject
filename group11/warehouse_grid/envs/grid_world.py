@@ -23,7 +23,6 @@ class GridWorldEnv(gym.Env):
     def reset(self, ag1, ag2, t1, t2, seed=None, options=None):
         del self.pygame
         self.pygame = map2D(flag=1, ag1=ag1, ag2=ag2)
-        print(ag1, ag2)
         self.set_targets(t1, t2)
         obs = self.pygame.start()
         return obs
