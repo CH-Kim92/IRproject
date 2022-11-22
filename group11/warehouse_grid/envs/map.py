@@ -23,7 +23,7 @@ GRAY = (128, 128, 128)
 
 
 class map2D:
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 100}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
 
     def __init__(self, flag, ag1, ag2):
         self.render_mode = "human"
@@ -32,6 +32,7 @@ class map2D:
         self.canvas = pygame.Surface((Window_size, Window_size+100))
         self.clock = pygame.time.Clock()
         self.number_items = 25
+        self.init = [[0, 0], [3, 0]]
         self.storage = []
         self.colours = []
         self.height = pix_square_size
@@ -176,6 +177,9 @@ class map2D:
 
     def get_goal_list(self):
         return self.sp_g
+
+    def get_agents_initial(self):
+        return self.init
 
     def get_action_sequence(self):
         return self.robot1_actions, self.robot2_actions
