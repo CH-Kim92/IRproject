@@ -322,6 +322,7 @@ if __name__ == "__main__":
     valid_action2_seq = None
     print(agent1_action_sequence)
     print(agent2_action_sequence)
+    print(valid_seq)
 
     # if valid_seq.count(False) != 0:
     #     collistion_index = valid_seq.index(False)
@@ -359,6 +360,8 @@ if __name__ == "__main__":
         target2 = a2_seq[action2_index][-1]
         print(temp_a1_pos)
         print(temp_a2_pos)
+        print(unvalid_action1)
+        print(unvalid_action2)
         print(target1)
         print(target2)
         v_action1, v_action2 = shuffle_simulate(temp_a1_pos, temp_a2_pos, unvalid_action1,
@@ -372,12 +375,9 @@ if __name__ == "__main__":
         a, b, valid_seq, c = valid_concatenate(temp_a1_pos, temp_a2_pos,
                                                agent1_action_sequence[ix1[0]:], agent2_action_sequence[ix2[0]:])
 
-    print(init_pos)
     a, b, valid_seq, c = valid_concatenate(init_pos[0], init_pos[1],
                                            agent1_action_sequence, agent2_action_sequence)
 
     print(agent1_action_sequence)
     print(agent2_action_sequence)
-    print(a)
-    print(b)
     print(valid_seq)

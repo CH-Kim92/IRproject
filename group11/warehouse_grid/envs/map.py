@@ -98,17 +98,7 @@ class map2D:
             direction1 = np.array([-1, 0], dtype=int)
         elif action1 == 3:  # up
             direction1 = np.array([0, -1], dtype=int)
-        # ## pick up ##
-        # elif action1 == 4:
-        #     self.robot1._set_holding_item(self.robot1.pos)
-        # ## drop ##
-        # elif action1 == 5:
-        #     self.robot1.holding = []
-        #     self.items.remove(self.robot1.holding)
 
-        # elif action1 == 6:
-        #     None
-        # if action1 < 4:
         #     self.robot1.pos = np.clip(
         #         self.robot1.pos + direction, 0, 4)
 
@@ -120,21 +110,13 @@ class map2D:
             direction2 = np.array([-1, 0], dtype=int)
         elif action2 == 3:  # up
             direction2 = np.array([0, -1], dtype=int)
-        ## pick up ##
-        elif action2 == 4:
-            self.robot2._set_holding_item(self.robot2.pos)
-        ## drop ##
-        # elif action2 == 5:
-        #     self.robot2.holding = []
-        #     self.items.remove(self.robot2.holding)
-        # elif action2 == 6:
-        #     None
-
-        self.robot1.pos = self.robot1.pos + direction1
-        self.robot2.pos = self.robot2.pos + direction2
+        # elif action2 == 4:
+        #     self.robot2._set_holding_item(self.robot2.pos)
         # if action2 < 4:
         #     self.robot2.pos = np.clip(
         #         self.robot2.pos + direction, 0, 4)
+        self.robot1.pos = self.robot1.pos + direction1
+        self.robot2.pos = self.robot2.pos + direction2
 
     def terminate(self):
         isdone = False
