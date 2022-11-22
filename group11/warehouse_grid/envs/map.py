@@ -98,9 +98,11 @@ class map2D:
             direction1 = np.array([-1, 0], dtype=int)
         elif action1 == 3:  # up
             direction1 = np.array([0, -1], dtype=int)
+        elif action1 == 4:
+            direction1 = np.array([0, 0], dtype=int)
 
-        #     self.robot1.pos = np.clip(
-        #         self.robot1.pos + direction, 0, 4)
+        # self.robot1.pos = np.clip(
+        #     self.robot1.pos + direction1, 0, 4)
 
         if action2 == 0:  # right
             direction2 = np.array([1, 0], dtype=int)
@@ -110,11 +112,13 @@ class map2D:
             direction2 = np.array([-1, 0], dtype=int)
         elif action2 == 3:  # up
             direction2 = np.array([0, -1], dtype=int)
+        elif action2 == 4:
+            direction2 = np.array([0, 0], dtype=int)
         # elif action2 == 4:
         #     self.robot2._set_holding_item(self.robot2.pos)
         # if action2 < 4:
         #     self.robot2.pos = np.clip(
-        #         self.robot2.pos + direction, 0, 4)
+        #         self.robot2.pos + direction2, 0, 4)
         self.robot1.pos = self.robot1.pos + direction1
         self.robot2.pos = self.robot2.pos + direction2
 
@@ -122,14 +126,20 @@ class map2D:
         isdone = False
         if np.array_equal(self.robot1.pos, self.robot2.pos):
             isdone = True
+
+        if np.array_equal(self.robot1.pos, self.targets[0]) and np.array_equal(self.robot2.pos, self.target[1]):
+            isdone = True
         return isdone
 
     def evaluate(self):
-        cost = cost_distance(self.robot1.pos, self.robot2.pos)
-        reward = 10 + 3*cost
+        # cost = cost_distance(self.robot1.pos, self.robot2.pos)
+        reward = -10
         if np.array_equal(self.robot1.pos, self.robot2.pos):
             reward = -300
-
+        if np.array_equal(self.robot1.pos, self.targets[0]):
+            reward = 200
+        if np.array_equal(self.robot2.pos, self.targets[1]):
+            reward = 200
         return reward
 
     # Agent observation space : position, holding

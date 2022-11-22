@@ -29,7 +29,6 @@ def shuffle_simulate(agent1_position, agent2_position, agent1_actions, agent2_ac
         ac2 = ag2_action2
         random.shuffle(ac1)
         random.shuffle(ac2)
-        print(state)
 
         for i in range(iteration):
 
@@ -47,8 +46,7 @@ def shuffle_simulate(agent1_position, agent2_position, agent1_actions, agent2_ac
 
             # Draw games
             env.render()
-
-            if i == iteration-1:
+            if i == iteration-2:
                 ac1.append(agent1_actions[-1])
                 ac2.append(agent2_actions[-1])
                 return ac1, ac2
@@ -79,6 +77,7 @@ def simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, t
         a2_action_seq = []
         # print(state)
         # AI tries up to MAX_TRY times
+        action_space = np.array([0, 1, 2, 3, 4])
         for i in range(MAX_TRY):
 
             # In the beginning, do random action to learn
@@ -94,8 +93,8 @@ def simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, t
             action = None
 
             if random.uniform(0, 1) < epsilon:
-                action1 = env.action_space.sample()
-                action2 = env.action_space.sample()
+                action1 = np.random.choice(action_space)
+                action2 = np.random.choice(action_space)
                 action = [action1, action2]
             else:
                 action1 = np.argmax(agent1_q_table[agent1[0], agent1[1]])
@@ -142,6 +141,7 @@ def simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, t
         # exploring rate decay
         if epsilon >= 0.005:
             epsilon *= epsilon_decay
+
     a1_action_seq.append(agent1_actions[-1])
     a2_action_seq.append(agent2_actions[-1])
 
@@ -358,17 +358,21 @@ if __name__ == "__main__":
         temp_a2_pos = a2_seq[action2_index - 1][-1]
         target1 = a1_seq[action1_index][-1]
         target2 = a2_seq[action2_index][-1]
-        print(temp_a1_pos)
-        print(temp_a2_pos)
-        print(unvalid_action1)
-        print(unvalid_action2)
-        print(target1)
-        print(target2)
+        # print(temp_a1_pos)
+        # print(temp_a2_pos)
+        # print(unvalid_action1)
+        # print(unvalid_action2)
+        # print(target1)
+        # print(target2)
         v_action1, v_action2 = shuffle_simulate(temp_a1_pos, temp_a2_pos, unvalid_action1,
                                                 unvalid_action2, target1, target2)
+        print(temp_a1_pos)
+        print(temp_a2_pos)
         # v_action1, v_action2 = simulate(temp_a1_pos, temp_a2_pos, unvalid_action1,
         #                                 unvalid_action2, target1, target2)
 
+        print(v_action1)
+        print(v_action2)
         agent1_action_sequence[ix1[0]][ix1[1]] = v_action1
         agent2_action_sequence[ix2[0]][ix2[1]] = v_action2
 
@@ -378,6 +382,6 @@ if __name__ == "__main__":
     a, b, valid_seq, c = valid_concatenate(init_pos[0], init_pos[1],
                                            agent1_action_sequence, agent2_action_sequence)
 
-    print(agent1_action_sequence)
-    print(agent2_action_sequence)
+    # print(agent1_action_sequence)
+    # print(agent2_action_sequence)
     print(valid_seq)

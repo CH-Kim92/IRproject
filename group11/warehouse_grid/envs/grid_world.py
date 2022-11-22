@@ -10,7 +10,7 @@ class GridWorldEnv(gym.Env):
 
     def __init__(self):
         self.pygame = map2D(flag=0, ag1=None, ag2=None)
-        self.action_space = spaces.Discrete(4)
+        self.action_space = spaces.Discrete(5)
         self.observation_space = spaces.Dict(
             {
                 "agent1": spaces.Box(np.array([0, 0]), np.array([6, 6]), dtype=int),
