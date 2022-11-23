@@ -20,15 +20,19 @@ class GridWorldEnv(gym.Env):
         self.action_sequence = None
         self.agents_location = None
 
-    def reset(self, ag1, ag2, t1, t2, seed=None, options=None):
+    def reset(self, ag1, ag2, t1, t2, flag, seed=None, options=None):
         del self.pygame
-        self.pygame = map2D(flag=1, ag1=ag1, ag2=ag2)
-        self.set_targets(t1, t2)
+        if flag == 1:
+            self.pygame = map2D(flag=1, ag1=ag1, ag2=ag2)
+            self.set_targets(t1, t2)
+        else:
+            self.pygame = map2D(flag=0, ag1=ag1, ag2=ag2)
+            self.set_targets(t1, t2)
+
         obs = self.pygame.start()
         return obs
 
     def step(self, action):
-        # print(action)
         self.pygame.action(action)
         obs = self.pygame.observe()
         reward = self.pygame.evaluate()

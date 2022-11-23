@@ -23,7 +23,7 @@ GRAY = (128, 128, 128)
 
 
 class map2D:
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 100}
 
     def __init__(self, flag, ag1, ag2):
         self.render_mode = "human"
@@ -50,7 +50,7 @@ class map2D:
                 k += 1
 
         self.basket1 = basket(0, np.array(
-            [0, 5], dtype=int), np.array([[0, 0]], dtype=int))
+            [0, 5], dtype=int), np.array([[2, 3], [2, 2]], dtype=int))
         self.basket2 = basket(0, np.array(
             [1, 5], dtype=int), np.array([[3, 3], [1, 3]], dtype=int))
         self.basket3 = basket(0, np.array(
@@ -83,7 +83,6 @@ class map2D:
         if flag == 1:
             self.robot1._set_position(ag1)
             self.robot2._set_position(ag2)
-        print(self.robot1.pos, self.robot2.pos)
 
     def action(self, action):
 
@@ -98,11 +97,16 @@ class map2D:
             direction1 = np.array([-1, 0], dtype=int)
         elif action1 == 3:  # up
             direction1 = np.array([0, -1], dtype=int)
-        elif action1 == 4:
+        elif action1 == 4:  # waiting
+            direction1 = np.array([0, 0], dtype=int)
+        elif action1 == 5:  # waiting
+            direction1 = np.array([0, 0], dtype=int)
+        elif action1 == 6:  # waiting
             direction1 = np.array([0, 0], dtype=int)
 
-        # self.robot1.pos = np.clip(
-        #     self.robot1.pos + direction1, 0, 4)
+        x_pos1 = np.clip(self.robot1.pos[0] + direction1[0], 0, 4)
+        y_pos1 = np.clip(self.robot1.pos[1] + direction1[1], 0, 5)
+        self.robot1.pos = np.array([x_pos1, y_pos1])
 
         if action2 == 0:  # right
             direction2 = np.array([1, 0], dtype=int)
@@ -112,34 +116,48 @@ class map2D:
             direction2 = np.array([-1, 0], dtype=int)
         elif action2 == 3:  # up
             direction2 = np.array([0, -1], dtype=int)
-        elif action2 == 4:
+        elif action2 == 4:  # waiting
+            direction2 = np.array([0, 0], dtype=int)
+        elif action2 == 5:  # waiting
+            direction2 = np.array([0, 0], dtype=int)
+        elif action2 == 6:  # waiting
             direction2 = np.array([0, 0], dtype=int)
         # elif action2 == 4:
         #     self.robot2._set_holding_item(self.robot2.pos)
         # if action2 < 4:
-        #     self.robot2.pos = np.clip(
-        #         self.robot2.pos + direction2, 0, 4)
-        self.robot1.pos = self.robot1.pos + direction1
-        self.robot2.pos = self.robot2.pos + direction2
+        x_pos2 = np.clip(self.robot2.pos[0] + direction2[0], 0, 4)
+        y_pos2 = np.clip(self.robot2.pos[1] + direction2[1], 0, 5)
+        self.robot2.pos = np.array([x_pos2, y_pos2])
+
+        # self.robot1.pos = self.robot1.pos + direction1
+        # self.robot2.pos = self.robot2.pos + direction2
 
     def terminate(self):
         isdone = False
+        # collision
         if np.array_equal(self.robot1.pos, self.robot2.pos):
             isdone = True
 
-        if np.array_equal(self.robot1.pos, self.targets[0]) and np.array_equal(self.robot2.pos, self.target[1]):
+        # reach goals
+        if np.array_equal(self.robot1.pos, self.targets[0]) and np.array_equal(self.robot2.pos, self.targets[1]):
             isdone = True
         return isdone
 
+    ########### Reward Function #######
     def evaluate(self):
         # cost = cost_distance(self.robot1.pos, self.robot2.pos)
         reward = -10
         if np.array_equal(self.robot1.pos, self.robot2.pos):
-            reward = -300
-        if np.array_equal(self.robot1.pos, self.targets[0]):
-            reward = 200
-        if np.array_equal(self.robot2.pos, self.targets[1]):
-            reward = 200
+            reward = -30
+        if np.array_equal(self.robot1.pos, self.targets[0]) and np.array_equal(self.robot2.pos, self.targets[1]):
+            reward = 1000
+        elif np.array_equal(self.robot1.pos, self.targets[0]):
+            # print("get1 100")
+            reward = 10
+        elif np.array_equal(self.robot2.pos, self.targets[1]):
+            # print("get 100")
+            reward = 10
+
         return reward
 
     # Agent observation space : position, holding
