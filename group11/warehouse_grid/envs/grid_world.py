@@ -6,7 +6,7 @@ from warehouse_grid.envs.map import map2D
 
 
 class GridWorldEnv(gym.Env):
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
     def __init__(self):
         self.pygame = map2D(flag=0, ag1=None, ag2=None)
@@ -59,3 +59,6 @@ class GridWorldEnv(gym.Env):
 
     def set_agents_location(self, agents_location):
         self.agents_location = agents_location
+
+    def set_basket_items(self, items):
+        self.pygame.set_basket_itmes(items)

@@ -4,7 +4,7 @@ import numpy as np
 
 
 class basket:
-    def __init__(self, status, pos, item):
+    def __init__(self, status, pos, item=None):
         self.pos = pos
         self.status = status
         self.holding = 0
@@ -23,3 +23,6 @@ class basket:
                 self.item.delete(i)
         if self.item.isEmpty():
             self.status = 1
+
+    def _set_item(self, item):
+        self.item = item
