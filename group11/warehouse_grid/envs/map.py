@@ -23,10 +23,10 @@ GRAY = (128, 128, 128)
 
 
 class map2D:
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 20}
 
-    def __init__(self, flag, ag1, ag2):
-        self.render_mode = "rgb_array"
+    def __init__(self, flag, ag1, ag2, items):
+        self.render_mode = "human"
         random.seed(10)
         self.window = None
         self.canvas = pygame.Surface((Window_size, Window_size+100))
@@ -35,10 +35,11 @@ class map2D:
         self.init = [[0, 0], [3, 0]]
         self.storage = []
         self.colours = []
-        self.height = pix_square_size
         self.poss = []
         self.targets = []
-        self.basket_items = []
+        self.basket_items = items
+
+        # Storage
         for i in range(self.number_items):
             self.colours.append((random.randint(
                 0, 255), (random.randint(0, 255)), (random.randint(0, 255))))
@@ -50,24 +51,37 @@ class map2D:
                 self.storage.append([item_position, self.colours[k]])
                 k += 1
 
+        # self.basket1 = basket(0, np.array(
+        #     [0, 5], dtype=int), np.array([[0, 3]], dtype=int))
+        # self.basket2 = basket(0, np.array(
+        #     [1, 5], dtype=int), np.array([[0, 3]], dtype=int))
+        # self.basket3 = basket(0, np.array(
+        #     [2, 5], dtype=int), np.array([[3, 0]], dtype=int))
+        # self.basket4 = basket(0, np.array(
+        #     [3, 5], dtype=int), np.array([[2, 2]], dtype=int))
+        # self.basket5 = basket(0, np.array(
+        #     [4, 5], dtype=int), np.array([[2, 4]], dtype=int))
+
         self.basket1 = basket(0, np.array(
-            [0, 5], dtype=int), np.array([[0, 3]], dtype=int))
+            [0, 5], dtype=int))
         self.basket2 = basket(0, np.array(
-            [1, 5], dtype=int), np.array([[0, 3]], dtype=int))
+            [1, 5], dtype=int))
         self.basket3 = basket(0, np.array(
-            [2, 5], dtype=int), np.array([[3, 0]], dtype=int))
+            [2, 5], dtype=int))
         self.basket4 = basket(0, np.array(
-            [3, 5], dtype=int), np.array([[2, 2]], dtype=int))
+            [3, 5], dtype=int))
         self.basket5 = basket(0, np.array(
-            [4, 5], dtype=int), np.array([[2, 4]], dtype=int))
+            [4, 5], dtype=int))
+
+        self.basket1._set_item(self.basket_items[0])
+        self.basket2._set_item(self.basket_items[1])
+        self.basket3._set_item(self.basket_items[2])
+        self.basket4._set_item(self.basket_items[3])
+        self.basket5._set_item(self.basket_items[4])
 
         self.baskets = np.array(
             [self.basket1, self.basket2, self.basket3, self.basket4, self.basket5])
 
-        self.items = []
-        for i in self.baskets:
-            for ii in i.item:
-                self.items.append(ii)
         self.robot1 = agent()
         self.robot2 = agent()
         if flag == 0:
@@ -86,6 +100,8 @@ class map2D:
             self.robot2._set_position(ag2)
         self.robot1_done = False
         self.robot2_done = False
+        print(self.robot1.goal)
+        print(self.robot2.goal)
 
     def action(self, action):
 
@@ -218,7 +234,7 @@ class map2D:
         self.targets.append(target1)
         self.targets.append(target2)
 
-    def set_basketitmes(self, items):
+    def set_basket_items(self, items):
         self.basket_items = items
 
     def sub_view(self):

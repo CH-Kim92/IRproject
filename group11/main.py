@@ -7,7 +7,7 @@ import warehouse_grid
 from itertools import permutations, combinations
 
 
-def shuffle_simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, target1, target2):
+def shuffle_simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, target1, target2, b_items):
 
     find_thredhold1 = 0
     find_thredhold2 = 0
@@ -42,7 +42,7 @@ def shuffle_simulate(agent1_position, agent2_position, agent1_actions, agent2_ac
     for p1 in a1:
         for p2 in a2:
             state = env.reset(ag1=agent1_position,
-                              ag2=agent2_position, t1=target1, t2=target2, flag=1)
+                              ag2=agent2_position, t1=target1, t2=target2, flag=1, items=b_items)
             for i in range(iter):
                 action1 = p1[i]
                 action2 = p2[i]
@@ -61,7 +61,7 @@ def shuffle_simulate(agent1_position, agent2_position, agent1_actions, agent2_ac
     return 0, 0, cc
 
 
-def fianl_simulation(agent1_position, agent2_position, agent1_actions, agent2_actions):
+def fianl_simulation(agent1_position, agent2_position, agent1_actions, agent2_actions, b_items):
     leng1 = len(agent1_actions)
     leng2 = len(agent2_actions)
     if leng1 > leng2:
@@ -71,7 +71,7 @@ def fianl_simulation(agent1_position, agent2_position, agent1_actions, agent2_ac
     tt1 = np.array([20, 20], dtype=int)
     tt2 = np.array([20, 20], dtype=int)
     state = env.reset(ag1=agent1_position,
-                      ag2=agent2_position, t1=tt1, t2=tt2, flag=0)
+                      ag2=agent2_position, t1=tt1, t2=tt2, flag=0, items=b_items)
     for i in range(iteration):
         env.render()
         reward = 0
@@ -94,7 +94,7 @@ def fianl_simulation(agent1_position, agent2_position, agent1_actions, agent2_ac
     return
 
 
-def simulate(agent1_position, agent2_position, target1, target2):
+def simulate(agent1_position, agent2_position, target1, target2, b_items):
     global epsilon, epsilon_decay
     action_space = []
     best_actions = []
@@ -109,7 +109,7 @@ def simulate(agent1_position, agent2_position, target1, target2):
 
         # Init environment
         state = env.reset(ag1=agent1_position,
-                          ag2=agent2_position, t1=target1, t2=target2, flag=1)
+                          ag2=agent2_position, t1=target1, t2=target2, flag=1, items=b_items)
         total_reward = 0
 
         a1_action_seq = []
@@ -179,6 +179,13 @@ def simulate(agent1_position, agent2_position, target1, target2):
 
             # When episode is done, print reward
             if done or i >= MAX_TRY - 1:
+                print(agent1_position)
+                print(agent2_position)
+                print(target1)
+                print(target2)
+                print(unvalid_action1)
+                print(unvalid_action2)
+
                 print("Episode %d finished after %i time steps with total reward = %f." % (
                     episode, i, total_reward))
 
@@ -298,23 +305,24 @@ def create_valid_arr(posarray1, posarray2):
 
 if __name__ == "__main__":
     env = gym.make("warehouse_grid/GridWorld-v0")
-    SUFFLE_MAX_EPISODES = 50
+
+    # Set basket items = [basekt1, basket2..basket5]
+    b_items = env.get_basket_items()
+
+    # env.set_basket_items(b_items)
 
     ###### Q -learning####
-    MAX_EPISODES = 4000
-    MAX_TRY = 300
-    epsilon = 0.999
+    MAX_EPISODES = 3000
+    MAX_TRY = 100
+    epsilon = 0.99
     epsilon_decay = 0.9
     learning_rate = 0.1
     gamma = 0.5
-    ####### Q - learning ################
 
     agent1_action_sequence, agent2_action_sequence = env.get_action_sequence()
     agent1_pos, agent2_pos = env.get_agents_location()
     init_pos = env.get_agents_initial_location()
 
-    print(agent1_action_sequence)
-    print(agent2_action_sequence)
     p1, p2, a1, a2 = validation(agent1_pos, agent2_pos,
                                 agent1_action_sequence, agent2_action_sequence)
     v = create_valid_arr(p1, p2)
@@ -330,11 +338,8 @@ if __name__ == "__main__":
     valid_action2_seq = None
     val_count = v.count(False)
     action_space = []
-    print(v)
     q_table = []
     ob = []
-    ##test##
-    v = [False]
     ########################### Using Q - Table ########################################
     while False in v:
         break
@@ -383,19 +388,18 @@ if __name__ == "__main__":
             target2 = np.array(
                 p2[flat2_index + len(unvalid_action2)-1], dtype=int)
 
-        ######################### Worst Case #######################################
-        temp_a1_pos = np.array([0, 0], dtype=int)
-        temp_a2_pos = np.array([4, 0], dtype=int)
+#         ######################### Worst Case #######################################
+#         temp_a1_pos = np.array([0, 0], dtype=int)
+#         temp_a2_pos = np.array([4, 0], dtype=int)
 
-        target1 = np.array([4, 5], dtype=int)
-        target2 = np.array([0, 5], dtype=int)
+#         target1 = np.array([4, 5], dtype=int)
+#         target2 = np.array([0, 5], dtype=int)
 
-#######################################################################################
+# #######################################################################################
 
         aaa = simulate(agent1_position=temp_a1_pos, agent2_position=temp_a2_pos,
-                       target1=target1, target2=target2)
+                       target1=target1, target2=target2, b_items=b_items)
 
-        print(aaa)
         aa1 = []
         aa2 = []
         for i in aaa:
@@ -418,7 +422,7 @@ if __name__ == "__main__":
                                     agent1_action_sequence, agent2_action_sequence)
 
         v = create_valid_arr(p1, p2)
-        break
+        # break
     ################################# Combination of list ###################################
 
     while False in v:
@@ -455,23 +459,8 @@ if __name__ == "__main__":
             target2 = np.array(
                 p2[flat2_index + len(unvalid_action2)-1], dtype=int)
 
-        ######################### Worst Case #######################################
-        temp_a1_pos = np.array([0, 0], dtype=int)
-        temp_a2_pos = np.array([4, 0], dtype=int)
-
-        target1 = np.array([4, 5], dtype=int)
-        target2 = np.array([0, 5], dtype=int)
-
-        unvalid_action1 = [0, 0, 0, 0, 1, 1, 1, 1, 1, 5]
-        unvalid_action2 = [2, 2, 2, 2, 1, 1, 1, 1, 1, 5]
-
-#######################################################################################
-
         v_action1, v_action2, conv = shuffle_simulate(temp_a1_pos, temp_a2_pos, unvalid_action1,
-                                                      unvalid_action2, target1, target2)
-
-        print(v_action1)
-        print(v_action2)
+                                                      unvalid_action2, target1, target2, b_items)
 
         if conv == 1:
             agent1_action_sequence[ix1[0]][ix1[1]] = v_action1
@@ -479,10 +468,16 @@ if __name__ == "__main__":
 
         p1, p2, a1, a2 = validation(agent1_pos, agent2_pos,
                                     agent1_action_sequence, agent2_action_sequence)
+
         v = create_valid_arr(p1, p2)
 
+    print(a1)
+    print(a2)
+    print(p1)
+    print(p2)
+    # print(b_items)
     a1.insert(0, 6)
     a2.insert(0, 6)
-    fianl_simulation(agent1_pos, agent2_pos, a1, a2)
+    fianl_simulation(agent1_pos, agent2_pos, a1, a2, b_items)
 
     # print(q_table)

@@ -14,15 +14,5 @@ class basket:
     def _get_obs(self):
         return np.array(self.status, self.pos, self.item, dtype=int)
 
-    # def _set_goal(self, goal):
-    #     self.goal = goal
-
-    def update(self, agent_location, action):
-        for i in self.item:
-            if i == agent_location and action == 5:
-                self.item.delete(i)
-        if self.item.isEmpty():
-            self.status = 1
-
     def _set_item(self, item):
         self.item = item
