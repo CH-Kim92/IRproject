@@ -12,12 +12,14 @@ class GridWorldEnv(gym.Env):
     def __init__(self):
 
         # Manually generate items in basket #
-        self.basket_items = np.array(
-            [[[2, 1]], [[3, 4]], [[4, 4]], [[2, 0]], [[1, 2]]])
+        # self.basket_items = np.array(
+        #     [[[4, 3]], [[0, 2]], [[0, 0]], [[3, 2]], [[1, 4]]])
 
         # Randomly generate items in basket #
-        # self.basket_items = np.random.randint(
-        #     0, [5, 5], size=[5, 1, 2], dtype=int)
+        random.seed(10)
+        self.basket_items = np.random.randint(
+            0, [5, 5], size=[5, 1, 2], dtype=int)
+
         self.pygame = map2D(flag=0, ag1=None, ag2=None,
                             items=self.basket_items)
         self.action_space = spaces.Discrete(5)
@@ -34,11 +36,13 @@ class GridWorldEnv(gym.Env):
     def reset(self, ag1, ag2, t1, t2, flag, items, seed=None, options=None):
         del self.pygame
         if flag == 1:
-            self.pygame = map2D(flag=1, ag1=ag1, ag2=ag2, items=items)
+            self.pygame = map2D(flag=1, ag1=ag1, ag2=ag2,
+                                items=items)
             self.set_targets(t1, t2)
             self.set_basket_items(items)
         else:
-            self.pygame = map2D(flag=0, ag1=ag1, ag2=ag2, items=items)
+            self.pygame = map2D(flag=0, ag1=ag1, ag2=ag2,
+                                items=items)
             self.set_targets(t1, t2)
             self.set_basket_items(items)
 
@@ -54,6 +58,9 @@ class GridWorldEnv(gym.Env):
 
     def render(self, mode="human", close=False):
         self.pygame.sub_view()
+
+    def final_render(self, mode='human', close=False):
+        self.pygame.view()
 
     def set_agents_location(self, agents):
         self.pygame.set_agents_location(agents)

@@ -66,23 +66,17 @@ def split_goal(agent_position, baskets):
             goal_list.pop(agent_1_first_goal)
         current_agent1_position = agent1_goals[len(agent1_goals)-1][0]
         current_agent2_position = agent2_goals[len(agent2_goals)-1][0]
-        # print(goal_list)
-        # print("agent 1 current location :", current_agent1_position)
-        # print("agent 2 current location :", current_agent2_position)
+
         cost_table = create_cost_table(
             [current_agent1_position, current_agent2_position], goal_list)
-        # print("ehee")
-        # print("agent 1 current location :", current_agent1_position)
-        # print("agent 2 current location :", current_agent2_position)
 
     if len(goal_list) == 1:
-        # agent1_pose = agent1_goals[len(agent1_goals)-1][0]
-        # agent2_pose = agent2_goals[len(agent2_goals)-1][0]
+
         a1 = cost_table[0][0]
         a2 = cost_table[1][0]
         if a1 > a2:
             agent2_goals.append(goal_list[0])
         else:
             agent1_goals.append(goal_list[0])
-    # print(agent1_goals, agent2_goals)
+
     return agent1_goals, agent2_goals

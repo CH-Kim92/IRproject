@@ -66,3 +66,26 @@ def path_planning(current_location, goal_list):
             break
         cur_location = goal_list[k-1][0]
     return sp_action
+
+
+def normalise_action(action1, action2):
+    len1 = len(action1)
+    len2 = len(action2)
+    iteration = 0
+    if len1 < len2:
+        iteration = len1
+    else:
+        iteration = len2
+
+    for iter in range(iteration):
+        for i in range(2):
+            l1 = len(action1[iter][i])
+            l2 = len(action2[iter][i])
+            diff = abs(l1-l2)
+            for z in range(diff):
+                if l1 < l2:
+                    action1[iter][i].insert(0, 6)
+                elif l1 > l2:
+                    action2[iter][i].insert(0, 6)
+
+    return action1, action2

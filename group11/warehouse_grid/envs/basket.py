@@ -16,3 +16,6 @@ class basket:
 
     def _set_item(self, item):
         self.item = item
+
+    def update(self):
+        return
