@@ -34,8 +34,6 @@ def shuffle_simulate(agent1_position, agent2_position, agent1_actions, agent2_ac
 
     for combination_value in combination1:
         for combination_value2 in combination2:
-            a1_pos = []
-            a2_pos = []
 
             temp_combination_value = list(combination_value)
             temp_combination_value2 = list(combination_value2)
@@ -197,7 +195,7 @@ def simulate(agent1_position, agent2_position, target1, target2, b_items, q_tabl
                 break
         # exploring rate decay
         if epsilon >= 0.005:
-            epsilon *= epsilon_decay
+            epsilon -= epsilon_decay
     return q_table
 
 
@@ -323,6 +321,7 @@ def combination_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p
     v = v
     flag = True
     while False in v:
+        count_false = v.count(False)
         collision_index = v.index(False)
         ix1 = find_action(ag1_actions, collision_index)
         ix2 = find_action(ag2_actions, collision_index)
@@ -340,11 +339,9 @@ def combination_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p
             if a2[i] == 4 or a2[i] == 5:
                 flat2_index = i
                 break
-        temp_a1_pos = np.array(p1[flat1_index], dtype=int)
-        temp_a2_pos = np.array(p2[flat2_index], dtype=int)
-        count_false = v.count(False)
-        print('========== go to simulation =====')
-        v_action1, v_action2, conv = shuffle_simulate(temp_a1_pos, temp_a2_pos, unvalid_action1,
+
+        print('========== go to replanning =====')
+        v_action1, v_action2, conv = shuffle_simulate(agent1_pos, agent2_pos, unvalid_action1,
                                                       unvalid_action2, ag1_actions, ag2_actions, ix1, ix2, count_false)
 
         if conv == 1:
@@ -361,21 +358,13 @@ def combination_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p
                                     ag1_actions, ag2_actions, False)
 
         v = create_valid_arr(p1, p2)
-        check_inf = v.count(False)
-
+        # check_inf = v.count(False)
+        # print(len(p1))
+        # print(len(p2))
+        # print(len(v))
         if v.count(False) == 0:
             flag = True
             break
-        elif check_inf == 0:
-            flag = True
-            break
-        else:
-            finish = v.index(False)
-            if finish == collision_index:
-                print("========== loop case ==========")
-                flag = False
-                time.sleep(2)
-                break
 
     if flag == False:
         return 0, 0, 0
@@ -497,12 +486,13 @@ def q_learning_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p1
 
 
 if __name__ == "__main__":
-    print("Enter the replanning mode ")
-    print("0 = combination")
-    print("1 = q-learning")
-    replanning_mode = input("Enter : ")
-    replanning_mode = int(replanning_mode)
 
+    # print("Enter the replanning mode ")
+    # print("0 = combination")
+    # print("1 = q-learning")
+    # replanning_mode = input("Enter : ")
+    # replanning_mode = int(replanning_mode)
+    replanning_mode = 1
     env = gym.make("warehouse_grid/GridWorld-v0")
     # Set basket items = [basekt1, basket2..basket5]
     b_items = env.get_basket_items()
@@ -512,11 +502,11 @@ if __name__ == "__main__":
     ###### Q -learning####
     MAX_EPISODES = 2000
     MAX_TRY = 100
-    epsilon = 0.99
-    epsilon_decay = 0.999
+    epsilon = 0.79
+    epsilon_decay = 0.0005
     # 0.0004
     learning_rate = 0.1
-    gamma = 0.9
+    gamma = 0.7
 
     agent1_action_sequence, agent2_action_sequence = env.get_action_sequence()
     agent1_pos, agent2_pos = env.get_agents_location()
@@ -552,22 +542,27 @@ if __name__ == "__main__":
             pass
         if v_flag == 0:
             print("========== there is no solution ==========")
-            print(a1)
-            print(a2)
-            print(p1)
-            print(p2)
+            # print(a1)
+            # print(a2)
+            # print(p1)
+            # print(p2)
         else:
-            print("========== replanning success ==========")
+            # print("========== replanning success ==========")
             p1, p2, a1, a2 = validation(agent1_pos, agent2_pos,
                                         ag1_valid_actions, ag2_valid_actions, False)
-            print("Agent 1 position concatenation")
-            print(a1)
-            print(p1)
-            print("Agent 2 position concatenation")
-            print(a2)
-            print(p2)
+            # print("Agent 1 position concatenation")
+            # print(a1)
+            # print(p1)
+            # print("Agent 2 position concatenation")
+            # print(a2)
+            # print(p2)
             v = create_valid_arr(p1, p2)
             print(v)
     else:
         print("============ optimal solution ==========")
-        fianl_simulation(agent1_pos, agent2_pos, a1, a2, b_items=b_items)
+        print("agent1 action sequence : ", agent1_action_sequence)
+        print("agent2 action sequence : ", agent2_action_sequence)
+    # print("total random basket cases : ", 10000)
+    # print("true cases : ", true_arr)
+    # print("false cases : ", false_arr)
+    # fianl_simulation(agent1_pos, agent2_pos, a1, a2, b_items=b_items)

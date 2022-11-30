@@ -38,7 +38,8 @@ class map2D:
         self.poss = []
         self.targets = []
         self.basket_items = items
-
+        self.location_sequence_for_collisioin = [[[0, 0], [4, 0]]]
+        self.action_itr = 0
         # Storage
         for i in range(self.number_items):
             self.colours.append((random.randint(
@@ -92,9 +93,9 @@ class map2D:
             self.robot2._set_position(ag2)
         self.robot1_done = False
         self.robot2_done = False
-        if self.robot1.goal != None and self.robot2.goal != None:
-            print(self.robot1.goal)
-            print(self.robot2.goal)
+        # if self.robot1.goal != None and self.robot2.goal != None:
+        #     print(self.robot1.goal)
+        #     print(self.robot2.goal)
 
     def action(self, action):
 
@@ -152,30 +153,33 @@ class map2D:
 
     ########### Reward Function #######
     def evaluate(self):
-        reward = -50
+        reward = -5
+        if(self.action_itr >= 1):
+            if (np.array_equal(self.location_sequence_for_collosion[0][self.action_itr], self.location_sequence_for_collosion[1][self.action_itr-1]) and np.array_equal(self.location_sequence_for_collosion[1][self.action_itr], self.location_sequence_for_collosion[0][self.action_itr-1])):
+                print("***************collision2*****************")
+                reward = -50
         if np.array_equal(self.robot1.pos, self.robot2.pos):
             # print("***************collision*****************")
-            reward = -500
+            reward = -50
         elif np.array_equal(self.robot1.pos, self.targets[0]) and np.array_equal(self.robot2.pos, self.targets[1]):
             # print("***************all done *****************")
-            reward = 2000
+            reward = 200
         elif (np.array_equal(self.robot1.pos, self.targets[0])) and (not self.robot1_done):
-
             self.robot1_done = True
             # print("*******************robot 1*******************")
-            reward = 700
+            reward = 70
         elif (np.array_equal(self.robot2.pos, self.targets[1])) and (not self.robot2_done):
             self.robot2_done = True
             # print("*******************robot 2******************* ")
-            reward = 700
+            reward = 70
         elif (np.array_equal(self.robot2.pos, self.targets[0])) and (not self.robot1_done):
             self.robot1_done = True
             # print("*******************robot 2 in target 1*******************")
-            reward = -100
+            reward = -10
         elif (np.array_equal(self.robot1.pos, self.targets[1])) and (not self.robot1_done):
             self.robot1_done = True
             # print("*******************robot 1 in target 2*******************")
-            reward = -100
+            reward = -10
 
         return reward
 
@@ -300,7 +304,7 @@ class map2D:
 
         ### Drawing storages ###
         for i in self.storage:
-            for c in self.items:
+            for c in self.basket_items:
                 if np.array_equal(i[0], c):
                     pygame.draw.rect(
                         self.canvas,
