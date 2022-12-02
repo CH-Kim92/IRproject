@@ -13,10 +13,10 @@ class GridWorldEnv(gym.Env):
 
         # Manually generate items in basket #
         # self.basket_items = np.array(
-        #     [[[4, 3]], [[2, 4]], [[4, 0]], [[1, 2]], [[2, 1]]])
+        #     [[[2, 4]], [[3, 1]], [[0, 3]], [[0, 2]], [[2, 4]]])
 
         # Randomly generate items in basket #
-        random.seed(10)
+        # np.random.seed(123456)
         self.basket_items = np.random.randint(
             0, [5, 5], size=[5, 1, 2], dtype=int)
 

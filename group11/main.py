@@ -5,7 +5,6 @@ import random
 import gym
 import warehouse_grid
 from itertools import permutations, combinations
-
 import time
 
 
@@ -59,7 +58,7 @@ def shuffle_simulate(agent1_position, agent2_position, agent1_actions, agent2_ac
                 v_flag = False
 
         if v_flag:
-            print("========== Replanning success ============")
+            # print("========== Replanning success ============")
             combination_value = list(combination_value)
             combination_value2 = list(combination_value2)
             combination_value.append(agent1_actions[-1])
@@ -105,6 +104,7 @@ def fianl_simulation(agent1_position, agent2_position, agent1_actions, agent2_ac
 
 
 def simulate(agent1_position, agent2_position, target1, target2, b_items, q_table, ob):
+
     global epsilon, epsilon_decay
     q_table = q_table
     action_space = []
@@ -128,7 +128,8 @@ def simulate(agent1_position, agent2_position, target1, target2, b_items, q_tabl
         a2_action_seq = []
         action_s = []
         for i in range(MAX_TRY):
-
+            # print(i)
+            env.render()
             # In the beginning, do random action to learn
             agent1 = state['agent1']
             agent2 = state['agent2']
@@ -144,17 +145,10 @@ def simulate(agent1_position, agent2_position, target1, target2, b_items, q_tabl
             index2_ob = index_2d(ob, agent2)
 
             if random.uniform(0, 1) < epsilon:
-                if np.array_equal(agent1, target1):
-                    action_ran = random.randint(19, 24)
-                    action = action_space[action_ran]
-                elif np.array_equal(agent2, target2):
-                    inx = [x-1 for x in range(1, 25) if x % 5 == 0]
-                    action_ran = random.choice(inx)
-                    action = action_space[action_ran]
-                else:
-                    action_ran = random.randint(0, 24)
-                    action = action_space[action_ran]
+                action_ran = random.randint(0, 24)
+                action = action_space[action_ran]
             else:
+                # print("QQQQQQQ")
                 best_action_Q = np.argmax(q_table[index1_ob, index2_ob])
                 action = action_space[best_action_Q]
 
@@ -186,7 +180,7 @@ def simulate(agent1_position, agent2_position, target1, target2, b_items, q_tabl
             state = next_state
 
             # Draw games
-            env.render()
+            # env.render()
 
             # When episode is done, print reward
             if done or i >= MAX_TRY - 1:
@@ -340,17 +334,17 @@ def combination_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p
                 flat2_index = i
                 break
 
-        print('========== go to replanning =====')
+        # print('========== go to replanning =====')
         v_action1, v_action2, conv = shuffle_simulate(agent1_pos, agent2_pos, unvalid_action1,
                                                       unvalid_action2, ag1_actions, ag2_actions, ix1, ix2, count_false)
 
         if conv == 1:
-            print('========== find optimal combination ==========')
+            # print('========== find optimal combination ==========')
             ag1_actions[ix1[0]][ix1[1]] = v_action1
             ag2_actions[ix2[0]][ix2[1]] = v_action2
             flag = True
         else:
-            print("==========it is failing case==========")
+            # print("==========it is failing case==========")
             flag = False
             break
 
@@ -383,7 +377,14 @@ def q_learning_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p1
     flag = True
     ob = []
     q_table = []
+    # print(agent1_action_sequence)
+    # print(agent2_action_sequence)
+    print(p1)
+    print(p2)
+    print(v)
+    print("q_learning_method")
     while False in v:
+        print("false counter", v.count(False))
         # Q-learning table
         best_actions = []
         flag = False
@@ -415,19 +416,22 @@ def q_learning_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p1
                 break
         temp_a1_pos = np.array(p1[flat1_index], dtype=int)
         temp_a2_pos = np.array(p2[flat2_index], dtype=int)
-        if p1[flat1_index + len(unvalid_action1)] == 4 or p1[flat1_index + len(unvalid_action1)] == 5:
-            target1 = np.array(
-                p1[flat1_index + len(unvalid_action1)], dtype=int)
-        else:
-            target1 = np.array(
-                p1[flat1_index + len(unvalid_action1)-1], dtype=int)
-        if p2[flat2_index + len(unvalid_action2)] == 4 or p2[flat2_index + len(unvalid_action2)] == 5:
-            target2 = np.array(
-                p2[flat2_index + len(unvalid_action2)], dtype=int)
-        else:
-            target2 = np.array(
-                p2[flat2_index + len(unvalid_action2)-1], dtype=int)
-
+        t_a1 = a1[flat1_index+1:]
+        t_a2 = a2[flat2_index+1:]
+        t_p1 = p1[flat1_index+1:]
+        t_p2 = p2[flat2_index+1:]
+        target1_index = 0
+        target2_index = 0
+        for i in range(len(t_a1)):
+            if t_a1[i] == 4 or t_a1[i] == 5:
+                target1_index = i
+                break
+        for i in range(len(t_a2)):
+            if t_a2[i] == 4 or t_a2[i] == 5:
+                target2_index = i
+                break
+        target1 = np.array(t_p1[target1_index], dtype=int)
+        target2 = np.array(t_p2[target2_index], dtype=int)
         q_table = simulate(agent1_position=temp_a1_pos, agent2_position=temp_a2_pos,
                            target1=target1, target2=target2, b_items=b_items, q_table=q_table, ob=ob)
 
@@ -449,7 +453,15 @@ def q_learning_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p1
             checker1 = np.array_equal(temp_a1_pos, target1)
             checker2 = np.array_equal(temp_a2_pos, target2)
             count_try += 1
+            # print(temp_a1_pos)
+            # print(temp_a2_pos)
+            # time.sleep(0.2)
             if count_try == 100:
+                print("--false---")
+                print("The Q-table doesnt converge")
+                print(target1)
+                print(target2)
+                return 0, 0, 0
                 break
 
         aa1 = []
@@ -463,6 +475,15 @@ def q_learning_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p1
                 aa2.append(6)
             else:
                 aa2.append(i[1])
+
+        if np.array_equal(target1, target2):
+            if len(aa1) < len(aa2):
+                aa1.insert(0, 6)
+                aa1.insert(0, 6)
+            else:
+                aa2.insert(0, 6)
+                aa2.insert(0, 6)
+
         aa1.append(unvalid_action1[-1])
         aa2.append(unvalid_action2[-1])
 
@@ -473,7 +494,6 @@ def q_learning_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p1
                                     ag1_actions, ag2_actions, False)
 
         v = create_valid_arr(p1, p2)
-
         checker = v.count(False)
         if checker == 0:
             flag = True
@@ -487,26 +507,21 @@ def q_learning_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p1
 
 if __name__ == "__main__":
 
-    # print("Enter the replanning mode ")
-    # print("0 = combination")
-    # print("1 = q-learning")
-    # replanning_mode = input("Enter : ")
-    # replanning_mode = int(replanning_mode)
-    replanning_mode = 1
+    print("Enter the replanning mode ")
+    print("0 = combination")
+    print("1 = q-learning")
+    replanning_mode = input("Enter : ")
+    replanning_mode = int(replanning_mode)
     env = gym.make("warehouse_grid/GridWorld-v0")
-    # Set basket items = [basekt1, basket2..basket5]
     b_items = env.get_basket_items()
 
-    # env.set_basket_items(b_items)
-
     ###### Q -learning####
-    MAX_EPISODES = 2000
+    MAX_EPISODES = 3000
     MAX_TRY = 100
-    epsilon = 0.79
-    epsilon_decay = 0.0005
-    # 0.0004
+    epsilon = 0.99
+    epsilon_decay = 0.0003
     learning_rate = 0.1
-    gamma = 0.7
+    gamma = 0.9
 
     agent1_action_sequence, agent2_action_sequence = env.get_action_sequence()
     agent1_pos, agent2_pos = env.get_agents_location()
@@ -515,7 +530,6 @@ if __name__ == "__main__":
     p1, p2, a1, a2 = validation(agent1_pos, agent2_pos,
                                 agent1_action_sequence, agent2_action_sequence, False)
     v = create_valid_arr(p1, p2)
-
     temp_a1_pos = 0
     temp_a2_pos = 0
     collision_action1_seq = []
@@ -542,27 +556,22 @@ if __name__ == "__main__":
             pass
         if v_flag == 0:
             print("========== there is no solution ==========")
-            # print(a1)
-            # print(a2)
-            # print(p1)
-            # print(p2)
+            print(a1)
+            print(a2)
+            print(p1)
+            print(p2)
+
         else:
-            # print("========== replanning success ==========")
+            print("========== replanning success ==========")
             p1, p2, a1, a2 = validation(agent1_pos, agent2_pos,
                                         ag1_valid_actions, ag2_valid_actions, False)
-            # print("Agent 1 position concatenation")
-            # print(a1)
-            # print(p1)
-            # print("Agent 2 position concatenation")
-            # print(a2)
-            # print(p2)
+            print("Agent 1 position concatenation")
+            print(a1)
+            print("Agent 2 position concatenation")
+            print(a2)
             v = create_valid_arr(p1, p2)
-            print(v)
+
     else:
-        print("============ optimal solution ==========")
-        print("agent1 action sequence : ", agent1_action_sequence)
-        print("agent2 action sequence : ", agent2_action_sequence)
-    # print("total random basket cases : ", 10000)
-    # print("true cases : ", true_arr)
-    # print("false cases : ", false_arr)
+        print("====== Action planning finds optimal paths")
+
     # fianl_simulation(agent1_pos, agent2_pos, a1, a2, b_items=b_items)
