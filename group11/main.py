@@ -6,6 +6,7 @@ import gym
 import warehouse_grid
 from itertools import permutations, combinations
 import time
+from visual_world import *
 
 
 def shuffle_simulate(agent1_position, agent2_position, agent1_actions, agent2_actions, all_actions1, all_actions2, ix1, ix2, counting):
@@ -379,9 +380,9 @@ def q_learning_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p1
     q_table = []
     # print(agent1_action_sequence)
     # print(agent2_action_sequence)
-    print(p1)
-    print(p2)
-    print(v)
+    # print(p1)
+    # print(p2)
+    # print(v)
     print("q_learning_method")
     while False in v:
         print("false counter", v.count(False))
@@ -440,7 +441,7 @@ def q_learning_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p1
         checker2 = np.array_equal(temp_a2_pos, target2)
 
         count_try = 0
-        while checker1 is not True or checker2 is not True:
+        while checker1 is False or checker2 is False:
             index1_ob = index_2d(ob, temp_a1_pos)
             index2_ob = index_2d(ob, temp_a2_pos)
             best_action = np.argmax(q_table[index1_ob, index2_ob])
@@ -505,6 +506,37 @@ def q_learning_method(agent1_action_sequence, agent2_action_sequence, a1, a2, p1
         return ag1_actions, ag2_actions, 1
 
 
+def make_sequence(a1, a2):
+    action_map = {}
+    for i in range(49):
+        # Change i to base 7 (possible actions)
+        action = [0] * 2  # for 2 agents
+        num = i
+        index = -1
+        while num > 0:
+            action[index] = num % 7  # number of actions 5
+            num = num // 7  # number of actions 5
+            index -= 1
+        action_map[i] = action
+
+    key_list = list(action_map.keys())
+    val_list = list(action_map.values())
+
+    if len(a1) < len(a2):
+        for i in range(len(a2)-len(a1)):
+            a1.append(6)
+    else:
+        for i in range(len(a1)-len(a2)):
+            a2.append(6)
+
+    action_pair = []
+    for i in range(len(a1)):
+        action_pair.append([a1[i], a2[i]])
+
+    action_sequence = [key_list[val_list.index(i)] for i in action_pair]
+    return action_sequence
+
+
 if __name__ == "__main__":
 
     print("Enter the replanning mode ")
@@ -543,6 +575,10 @@ if __name__ == "__main__":
     action_space = []
     q_table = []
     ob = []
+    items = []
+
+    for i in b_items:
+        items.append(i[0].tolist())
 
     if val_count != 0:
         if replanning_mode == 0:
@@ -565,13 +601,26 @@ if __name__ == "__main__":
             print("========== replanning success ==========")
             p1, p2, a1, a2 = validation(agent1_pos, agent2_pos,
                                         ag1_valid_actions, ag2_valid_actions, False)
-            print("Agent 1 position concatenation")
+            print("Agent 1 action sequence")
             print(a1)
-            print("Agent 2 position concatenation")
+            print("Agent 2 action sequence")
             print(a2)
+            print(b_items)
             v = create_valid_arr(p1, p2)
 
     else:
         print("====== Action planning finds optimal paths")
+        print("Agent 1 action sequence")
+        print(a1)
+        print("Agent 2 action sequence ")
+        print(a2)
+        print(b_items)
+
+    visual_sequence = make_sequence(a1, a2)
+    env = VisWorldEnv()
+    env.reset(items)
+    for action in visual_sequence:
+        env.step(action)
+        env.render()
 
     # fianl_simulation(agent1_pos, agent2_pos, a1, a2, b_items=b_items)

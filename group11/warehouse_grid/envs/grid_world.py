@@ -7,7 +7,7 @@ import random
 
 
 class GridWorldEnv(gym.Env):
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 100}
 
     def __init__(self):
 
@@ -15,11 +15,16 @@ class GridWorldEnv(gym.Env):
         # self.basket_items = np.array(
         #     [[[2, 4]], [[3, 1]], [[0, 3]], [[0, 2]], [[2, 4]]])
 
-        # Randomly generate items in basket #
-        # np.random.seed(123456)
-        self.basket_items = np.random.randint(
-            0, [5, 5], size=[5, 1, 2], dtype=int)
+        # Randomly generate items in basket with replacement#
+        # self.basket_items = np.random.randint(
+        #     0, [5, 5], size=[5, 1, 2], dtype=int)
 
+        # without replacement #
+        sample_b = range(25)
+        it = random.sample(sample_b, k=5)
+        self.basket_items = np.array([[[int(it[0]/5), int(it[0] % 5)]], [[int(it[1]/5), int(it[1] % 5)]], [
+                                     [int(it[2]/5), int(it[2] % 5)]], [[int(it[3]/5), int(it[3] % 5)]], [[int(it[4]/5), int(it[4] % 5)]]])
+        print(self.basket_items)
         self.pygame = map2D(flag=0, ag1=None, ag2=None,
                             items=self.basket_items)
         self.action_space = spaces.Discrete(5)

@@ -14,8 +14,8 @@ pix_square_size = (
 )
 
 RED = (255, 0, 0)
-GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
 YELLOW = (255, 255, 0)
 CYAN = (0, 255, 255)
 ORANGE = (255, 165, 0)
@@ -23,7 +23,7 @@ GRAY = (128, 128, 128)
 
 
 class map2D:
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 400}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 1000}
 
     def __init__(self, flag, ag1, ag2, items):
         self.render_mode = "rgb_array"
@@ -302,13 +302,13 @@ class map2D:
         ## Drawing target ###
         pygame.draw.rect(
             self.canvas,
-            YELLOW,
+            RED,
             pygame.Rect(pix_square_size*self.targets[0],
                         (pix_square_size, pix_square_size))
         )
         pygame.draw.rect(
             self.canvas,
-            GREEN,
+            BLUE,
             pygame.Rect(pix_square_size*self.targets[1],
                         (pix_square_size, pix_square_size))
         )
@@ -353,92 +353,92 @@ class map2D:
             # The following line will automatically add a delay to keep the framerate stable.
             self.clock.tick(self.metadata["render_fps"])
 
-    # def view(self):
-    #     if self.window is None and self.render_mode == "human":
-    #         pygame.init()
-    #         pygame.display.init()
-    #         self.window = pygame.display.set_mode(
-    #             (Window_size, Window_size+100))
-    #     self.canvas = pygame.Surface((Window_size, Window_size+100))
-    #     self.canvas.fill((255, 255, 255))
+    def view(self):
+        if self.window is None and self.render_mode == "human":
+            pygame.init()
+            pygame.display.init()
+            self.window = pygame.display.set_mode(
+                (Window_size, Window_size+100))
+        self.canvas = pygame.Surface((Window_size, Window_size+100))
+        self.canvas.fill((255, 255, 255))
 
-    #     ### Drawing storages ###
-    #     for i in self.storage:
-    #         for c in self.items:
-    #             if np.array_equal(i[0], c):
-    #                 pygame.draw.rect(
-    #                     self.canvas,
-    #                     i[1],
-    #                     pygame.Rect(
-    #                         pix_square_size * i[0],
-    #                         (pix_square_size-3, pix_square_size-3)
-    #                     )
-    #                 )
+        ### Drawing storages ###
+        for i in self.storage:
+            for c in self.items:
+                if np.array_equal(i[0], c):
+                    pygame.draw.rect(
+                        self.canvas,
+                        i[1],
+                        pygame.Rect(
+                            pix_square_size * i[0],
+                            (pix_square_size-3, pix_square_size-3)
+                        )
+                    )
 
-    #     ### Drawing grd ###
+        ### Drawing grd ###
 
-    #     ### Drawing robot ###
-    #     # print(self.robot.colour)
-    #     pygame.draw.circle(
-    #         self.canvas,
-    #         self.robot.colour,
-    #         (np.array(self.robot.pos, dtype=int) + 0.5) * pix_square_size,
-    #         pix_square_size / 5,
-    #     )
-    #     pygame.draw.circle(
-    #         self.canvas,
-    #         (0, 0, 0),
-    #         (np.array(self.robot.pos, dtype=int) + 0.5) * pix_square_size,
-    #         pix_square_size / 3,
-    #         width=3
-    #     )
+        ### Drawing robot ###
+        # print(self.robot.colour)
+        pygame.draw.circle(
+            self.canvas,
+            self.robot.colour,
+            (np.array(self.robot.pos, dtype=int) + 0.5) * pix_square_size,
+            pix_square_size / 5,
+        )
+        pygame.draw.circle(
+            self.canvas,
+            (0, 0, 0),
+            (np.array(self.robot.pos, dtype=int) + 0.5) * pix_square_size,
+            pix_square_size / 3,
+            width=3
+        )
 
-    #     ### Drawing target ###
-    #     # pygame.draw.rect(
-    #     #     self.canvas,
-    #     #     RED,
-    #     #     pygame.Rect(pix_square_size*self.basket1.pos,
-    #     #                 (pix_square_size, pix_square_size))
-    #     # )
+        ### Drawing target ###
+        # pygame.draw.rect(
+        #     self.canvas,
+        #     RED,
+        #     pygame.Rect(pix_square_size*self.basket1.pos,
+        #                 (pix_square_size, pix_square_size))
+        # )
 
-    #     for b in self.baskets:
-    #         for i in range(len(b.item)):
-    #             for k in range(len(self.poss)):
-    #                 if np.array_equal(self.poss[k], b.item[i]):
-    #                     pygame.draw.rect(
-    #                         self.canvas,
-    #                         self.storage[k][1],
-    #                         pygame.Rect(
-    #                             pix_square_size * b.pos+i *
-    #                             pix_square_size/len(b.item),
-    #                             (pix_square_size/len(b.item), pix_square_size)
-    #                         )
-    #                     )
+        for b in self.baskets:
+            for i in range(len(b.item)):
+                for k in range(len(self.poss)):
+                    if np.array_equal(self.poss[k], b.item[i]):
+                        pygame.draw.rect(
+                            self.canvas,
+                            self.storage[k][1],
+                            pygame.Rect(
+                                pix_square_size * b.pos+i *
+                                pix_square_size/len(b.item),
+                                (pix_square_size/len(b.item), pix_square_size)
+                            )
+                        )
 
-    #     ### Draw Line ####
-    #     for x in range(Size + 2):
-    #         pygame.draw.line(
-    #             self.canvas,
-    #             0,
-    #             (0, pix_square_size * x),
-    #             (Window_size, pix_square_size * x),
-    #             width=3,
-    #         )
-    #         pygame.draw.line(
-    #             self.canvas,
-    #             0,
-    #             (pix_square_size * x, 0),
-    #             (pix_square_size * x, Window_size),
-    #             width=3,
-    #         )
+        ### Draw Line ####
+        for x in range(Size + 2):
+            pygame.draw.line(
+                self.canvas,
+                0,
+                (0, pix_square_size * x),
+                (Window_size, pix_square_size * x),
+                width=3,
+            )
+            pygame.draw.line(
+                self.canvas,
+                0,
+                (pix_square_size * x, 0),
+                (pix_square_size * x, Window_size),
+                width=3,
+            )
 
-    #     if self.render_mode == "human":
+        if self.render_mode == "human":
 
-    #         # The following line copies our drawings from `canvas` to the visible window
-    #         self.window.blit(self.canvas, self.canvas.get_rect())
-    #         pygame.event.pump()
-    #         pygame.display.update()
+            # The following line copies our drawings from `canvas` to the visible window
+            self.window.blit(self.canvas, self.canvas.get_rect())
+            pygame.event.pump()
+            pygame.display.update()
 
-    #         # We need to ensure that human-rendering occurs at the predefined framerate.
-    #         # The following line will automatically add a delay to keep the framerate stable.
-    #         self.clock.tick(self.metadata["render_fps"])
+            # We need to ensure that human-rendering occurs at the predefined framerate.
+            # The following line will automatically add a delay to keep the framerate stable.
+            self.clock.tick(self.metadata["render_fps"])
